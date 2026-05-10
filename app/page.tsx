@@ -355,12 +355,25 @@ export default function Home() {
       )}
 
       {/* FLOAT BUTTON */}
-      <button
-        onClick={() => setShowForm(true)}
-        className="fixed bottom-5 right-5 md:bottom-10 md:right-10 z-50 w-14 h-14 border border-white/20 bg-black/60 backdrop-blur-xl hover:bg-white hover:text-black transition"
-      >
-        +
-      </button>
+<button
+  onClick={() => setShowForm(true)}
+  className="
+  fixed bottom-5 right-5 md:bottom-10 md:right-10 z-50
+  w-16 h-16 md:w-20 md:h-20
+  rounded-full
+  bg-white text-black
+  text-3xl md:text-4xl
+  font-light
+  shadow-[0_0_40px_rgba(255,255,255,0.18)]
+  border border-white/60
+  hover:scale-105
+  hover:bg-neutral-200
+  active:scale-95
+  transition-all duration-300
+"
+>
+  +
+</button>
 
       {/* FORM */}
       {showForm && (

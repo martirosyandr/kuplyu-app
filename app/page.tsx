@@ -5,11 +5,11 @@ import { useEffect, useState } from "react";
 import { Space_Grotesk, IBM_Plex_Mono } from "next/font/google";
 
 const grotesk = Space_Grotesk({
-  subsets: ["latin", "cyrillic"],
+  subsets: ["latin"],
 });
 
 const mono = IBM_Plex_Mono({
-  subsets: ["latin", "cyrillic"],
+  subsets: ["latin"],
   weight: ["400", "500"],
 });
 
@@ -340,7 +340,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* ALL */}
               <button
                 onClick={() => {
                   setSelectedCategory("Все");
@@ -480,7 +479,6 @@ export default function Home() {
               key={item.id}
               className="group border-r border-b border-white/10 relative bg-[#050505]"
             >
-              {/* ACTIONS */}
               <div className="absolute top-3 left-3 right-3 z-20 flex justify-between">
                 <button
                   onClick={() => {
@@ -513,7 +511,6 @@ export default function Home() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                {/* IMAGE */}
                 <div className="aspect-[3/4] overflow-hidden bg-[#0b0b0b]">
                   <img
                     src={item.image}
@@ -522,7 +519,6 @@ export default function Home() {
                   />
                 </div>
 
-                {/* INFO */}
                 <div className="p-4 md:p-6">
                   <div
                     className={`${mono.className} text-[10px] uppercase tracking-[0.22em] text-neutral-500 mb-4`}

@@ -2,6 +2,16 @@
 
 import { supabase } from "./supabase";
 import { useEffect, useState } from "react";
+import { Space_Grotesk, IBM_Plex_Mono } from "next/font/google";
+
+const grotesk = Space_Grotesk({
+  subsets: ["latin", "cyrillic"],
+});
+
+const mono = IBM_Plex_Mono({
+  subsets: ["latin", "cyrillic"],
+  weight: ["400", "500"],
+});
 
 export default function Home() {
   const [items, setItems] = useState<any[]>([]);
@@ -18,30 +28,25 @@ export default function Home() {
 
   const [editingId, setEditingId] = useState<number | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [showCatalog, setShowCatalog] = useState(false);
 
   useEffect(() => {
     fetchItems();
   }, []);
 
   async function fetchItems() {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("items")
       .select("*")
       .order("id", { ascending: false });
 
-    if (data) {
-      setItems(data);
-    }
-
-    if (error) {
-      console.error(error);
-    }
+    if (data) setItems(data);
   }
 
   async function addItem() {
     if (!title || !brand) return;
 
-    const { error } = await supabase.from("items").insert({
+    await supabase.from("items").insert({
       title,
       brand,
       price,
@@ -50,19 +55,13 @@ export default function Home() {
       source_url,
     });
 
-    if (!error) {
-      resetForm();
-      setShowForm(false);
-      fetchItems();
-    }
-
-    if (error) {
-      console.log(JSON.stringify(error, null, 2));
-    }
+    resetForm();
+    fetchItems();
+    setShowForm(false);
   }
 
   async function updateItem(id: number) {
-    const { error } = await supabase
+    await supabase
       .from("items")
       .update({
         title,
@@ -74,31 +73,16 @@ export default function Home() {
       })
       .eq("id", id);
 
-    if (!error) {
-      setEditingId(null);
-      setShowForm(false);
-      resetForm();
-      fetchItems();
-    }
-
-    if (error) {
-      console.error(error);
-    }
+    resetForm();
+    setEditingId(null);
+    fetchItems();
+    setShowForm(false);
   }
 
   async function deleteItem(id: number) {
-    const { error } = await supabase
-      .from("items")
-      .delete()
-      .eq("id", id);
+    await supabase.from("items").delete().eq("id", id);
 
-    if (!error) {
-      fetchItems();
-    }
-
-    if (error) {
-      console.error(error);
-    }
+    fetchItems();
   }
 
   function resetForm() {
@@ -110,145 +94,338 @@ export default function Home() {
     setSourceUrl("");
   }
 
-  const categories = [
-    "Все",
-    "Пальто",
-    "Куртки",
-    "Костюмы",
-    "Блейзеры",
-    "Брюки",
-    "Рубашки",
-    "Поло",
-    "Футболки",
-    "Свитеры",
-    "Кардиганы",
-    "Кроссовки",
-    "Лоферы",
-    "Часы",
-    "Аксессуары",
-  ];
-
   return (
-    <main className="min-h-screen bg-black text-white">
-      <div className="sticky top-0 z-50 border-b border-neutral-900 bg-black/95 backdrop-blur-xl">
-        <div className="flex items-center justify-between gap-3 px-4 py-4 md:px-6">
-          <h1 className="text-3xl font-bold tracking-tight whitespace-nowrap">
-            КУПЛЮ
-          </h1>
+    <main
+      className={`${grotesk.className} bg-[#050505] text-white min-h-screen overflow-hidden relative`}
+    >
+      {/* GRAIN */}
+      <div className="fixed inset-0 opacity-[0.03] pointer-events-none bg-[radial-gradient(#ffffff_0.8px,transparent_0.8px)] [background-size:10px_10px]" />
 
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Поиск"
-            className="w-full max-w-[220px] rounded-full border border-neutral-800 bg-neutral-900 px-4 py-3 text-sm outline-none transition focus:border-neutral-600"
-          />
-        </div>
+      {/* GRADIENT */}
+      <div className="fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_35%)] pointer-events-none" />
 
-        <div className="flex gap-2 overflow-x-auto px-4 pb-4 md:px-6 scrollbar-hide">
-          <button
-            onClick={() => setSort("default")}
-            className={`whitespace-nowrap rounded-full px-4 py-2 text-sm transition ${
-              sort === "default"
-                ? "bg-white text-black"
-                : "bg-neutral-900 text-white"
-            }`}
-          >
-            По умолчанию
-          </button>
+      {/* GRID */}
+      <div className="fixed inset-0 pointer-events-none opacity-[0.06]">
+        <div className="absolute left-1/3 top-0 w-px h-full bg-white" />
+        <div className="absolute left-2/3 top-0 w-px h-full bg-white" />
+      </div>
 
-          <button
-            onClick={() => setSort("cheap")}
-            className={`whitespace-nowrap rounded-full px-4 py-2 text-sm transition ${
-              sort === "cheap"
-                ? "bg-white text-black"
-                : "bg-neutral-900 text-white"
-            }`}
-          >
-            Дешевые
-          </button>
+      {/* HEADER */}
+      <div className="border-b border-white/10">
+        <div className="px-5 md:px-10 pt-8 md:pt-14 pb-8">
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-8">
+            <div>
+              <h1 className="text-[54px] md:text-[120px] font-bold leading-[0.85] tracking-[-0.09em]">
+                КУПЛЮ
+              </h1>
 
-          <button
-            onClick={() => setSort("expensive")}
-            className={`whitespace-nowrap rounded-full px-4 py-2 text-sm transition ${
-              sort === "expensive"
-                ? "bg-white text-black"
-                : "bg-neutral-900 text-white"
-            }`}
-          >
-            Дорогие
-          </button>
-        </div>
-
-        <div className="overflow-x-auto border-t border-neutral-900">
-          <div className="flex gap-2 px-4 py-4 min-w-max md:px-6">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`whitespace-nowrap rounded-full px-4 py-2 text-sm transition ${
-                  selectedCategory === category
-                    ? "bg-white text-black"
-                    : "border border-neutral-800 bg-neutral-900 text-white"
-                }`}
+              <div
+                className={`${mono.className} mt-4 text-[10px] md:text-xs uppercase tracking-[0.3em] text-neutral-500`}
               >
-                {category}
+                private fashion archive
+              </div>
+
+              <button
+                onClick={() => setShowCatalog(true)}
+                className={`${mono.className} mt-10 text-[11px] uppercase tracking-[0.35em] text-neutral-500 hover:text-white transition`}
+              >
+                Catalog
               </button>
-            ))}
+            </div>
+
+            <div className="w-full md:w-[320px]">
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="SEARCH"
+                className={`${mono.className} w-full bg-transparent border-b border-white/20 pb-4 outline-none text-sm tracking-[0.2em] uppercase placeholder:text-neutral-600`}
+              />
+            </div>
           </div>
         </div>
       </div>
 
-      {showForm && (
-        <div className="border-b border-neutral-900 p-4 md:p-6">
-          <h2 className="text-xl font-semibold mb-5">
-            {editingId ? "Редактировать вещь" : "Добавить вещь"}
-          </h2>
+      {/* CONTROLS */}
+      <div className="border-b border-white/10 overflow-x-auto">
+        <div className="flex gap-8 px-5 md:px-10 py-5 min-w-max">
+          {["default", "cheap", "expensive"].map((type) => (
+            <button
+              key={type}
+              onClick={() => setSort(type)}
+              className={`${mono.className} text-[11px] uppercase tracking-[0.2em] transition ${
+                sort === type
+                  ? "text-white"
+                  : "text-neutral-500 hover:text-white"
+              }`}
+            >
+              {type === "default"
+                ? "Default"
+                : type === "cheap"
+                ? "Lowest Price"
+                : "Highest Price"}
+            </button>
+          ))}
+        </div>
+      </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Название"
-              className="bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-3 text-sm outline-none"
-            />
+      {/* SIDEBAR */}
+      {showCatalog && (
+        <div className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-xl">
+          <div className="w-[92%] md:w-[420px] h-full bg-[#070707] border-r border-white/10 p-6 md:p-10 overflow-y-auto">
+            <div className="flex items-center justify-between mb-16">
+              <div>
+                <div
+                  className={`${mono.className} text-[10px] uppercase tracking-[0.35em] text-neutral-500`}
+                >
+                  Navigation
+                </div>
 
-            <input
-              value={brand}
-              onChange={(e) => setBrand(e.target.value)}
-              placeholder="Бренд"
-              className="bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-3 text-sm outline-none"
-            />
+                <h2 className="text-3xl md:text-5xl tracking-[-0.08em] font-bold mt-2">
+                  CATALOG
+                </h2>
+              </div>
 
-            <input
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              placeholder="Цена"
-              className="bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-3 text-sm outline-none"
-            />
+              <button
+                onClick={() => setShowCatalog(false)}
+                className={`${mono.className} text-xs uppercase tracking-[0.25em] text-neutral-500 hover:text-white`}
+              >
+                Close
+              </button>
+            </div>
 
-            <input
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              placeholder="Категория"
-              className="bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-3 text-sm outline-none"
-            />
+            <div className="space-y-14">
+              {/* OUTERWEAR */}
+              <div>
+                <div
+                  className={`${mono.className} text-[10px] uppercase tracking-[0.35em] text-neutral-600 mb-5`}
+                >
+                  01 OUTERWEAR
+                </div>
 
-            <input
-              value={image}
-              onChange={(e) => setImage(e.target.value)}
-              placeholder="Ссылка на фото"
-              className="bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-3 text-sm outline-none"
-            />
+                <div className="flex flex-col gap-3">
+                  {["Пальто", "Куртки", "Блейзеры"].map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => {
+                        setSelectedCategory(cat);
+                        setShowCatalog(false);
+                      }}
+                      className={`text-left text-2xl md:text-3xl tracking-[-0.06em] transition ${
+                        selectedCategory === cat
+                          ? "text-white"
+                          : "text-neutral-500 hover:text-white"
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-            <input
-              value={source_url}
-              onChange={(e) => setSourceUrl(e.target.value)}
-              placeholder="Ссылка на товар"
-              className="bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-3 text-sm outline-none"
-            />
+              {/* TOPS */}
+              <div>
+                <div
+                  className={`${mono.className} text-[10px] uppercase tracking-[0.35em] text-neutral-600 mb-5`}
+                >
+                  02 TOPS
+                </div>
+
+                <div className="flex flex-col gap-3">
+                  {[
+                    "Рубашки",
+                    "Поло",
+                    "Футболки",
+                    "Свитеры",
+                    "Кардиганы",
+                  ].map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => {
+                        setSelectedCategory(cat);
+                        setShowCatalog(false);
+                      }}
+                      className={`text-left text-2xl md:text-3xl tracking-[-0.06em] transition ${
+                        selectedCategory === cat
+                          ? "text-white"
+                          : "text-neutral-500 hover:text-white"
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* BOTTOMS */}
+              <div>
+                <div
+                  className={`${mono.className} text-[10px] uppercase tracking-[0.35em] text-neutral-600 mb-5`}
+                >
+                  03 BOTTOMS
+                </div>
+
+                <div className="flex flex-col gap-3">
+                  {["Брюки"].map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => {
+                        setSelectedCategory(cat);
+                        setShowCatalog(false);
+                      }}
+                      className={`text-left text-2xl md:text-3xl tracking-[-0.06em] transition ${
+                        selectedCategory === cat
+                          ? "text-white"
+                          : "text-neutral-500 hover:text-white"
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* FOOTWEAR */}
+              <div>
+                <div
+                  className={`${mono.className} text-[10px] uppercase tracking-[0.35em] text-neutral-600 mb-5`}
+                >
+                  04 FOOTWEAR
+                </div>
+
+                <div className="flex flex-col gap-3">
+                  {["Кроссовки", "Лоферы"].map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => {
+                        setSelectedCategory(cat);
+                        setShowCatalog(false);
+                      }}
+                      className={`text-left text-2xl md:text-3xl tracking-[-0.06em] transition ${
+                        selectedCategory === cat
+                          ? "text-white"
+                          : "text-neutral-500 hover:text-white"
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* ACCESSORIES */}
+              <div>
+                <div
+                  className={`${mono.className} text-[10px] uppercase tracking-[0.35em] text-neutral-600 mb-5`}
+                >
+                  05 ACCESSORIES
+                </div>
+
+                <div className="flex flex-col gap-3">
+                  {["Часы", "Аксессуары"].map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => {
+                        setSelectedCategory(cat);
+                        setShowCatalog(false);
+                      }}
+                      className={`text-left text-2xl md:text-3xl tracking-[-0.06em] transition ${
+                        selectedCategory === cat
+                          ? "text-white"
+                          : "text-neutral-500 hover:text-white"
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* ALL */}
+              <button
+                onClick={() => {
+                  setSelectedCategory("Все");
+                  setShowCatalog(false);
+                }}
+                className={`${mono.className} mt-10 text-sm uppercase tracking-[0.3em] text-neutral-500 hover:text-white`}
+              >
+                Show All
+              </button>
+            </div>
           </div>
+        </div>
+      )}
 
-          <div className="flex gap-3 mt-5">
+      {/* FLOAT BUTTON */}
+      <button
+        onClick={() => setShowForm(true)}
+        className="fixed bottom-5 right-5 md:bottom-10 md:right-10 z-50 w-14 h-14 border border-white/20 bg-black/60 backdrop-blur-xl hover:bg-white hover:text-black transition"
+      >
+        +
+      </button>
+
+      {/* FORM */}
+      {showForm && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-2xl flex items-end md:items-center justify-center p-4">
+          <div className="w-full max-w-3xl border border-white/10 bg-[#0b0b0b]">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
+              <h2 className="text-2xl tracking-[-0.08em] font-bold">
+                {editingId ? "EDIT ITEM" : "ADD ITEM"}
+              </h2>
+
+              <button
+                onClick={() => {
+                  setShowForm(false);
+                  setEditingId(null);
+                }}
+                className="text-neutral-500 hover:text-white transition"
+              >
+                CLOSE
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2">
+              {[
+                {
+                  value: title,
+                  set: setTitle,
+                  placeholder: "TITLE",
+                },
+                {
+                  value: brand,
+                  set: setBrand,
+                  placeholder: "BRAND",
+                },
+                {
+                  value: price,
+                  set: setPrice,
+                  placeholder: "PRICE",
+                },
+                {
+                  value: category,
+                  set: setCategory,
+                  placeholder: "CATEGORY",
+                },
+                {
+                  value: image,
+                  set: setImage,
+                  placeholder: "IMAGE URL",
+                },
+                {
+                  value: source_url,
+                  set: setSourceUrl,
+                  placeholder: "SOURCE URL",
+                },
+              ].map((field, i) => (
+                <input
+                  key={i}
+                  value={field.value}
+                  onChange={(e) => field.set(e.target.value)}
+                  placeholder={field.placeholder}
+                  className={`${mono.className} bg-transparent border-b border-r border-white/10 px-6 py-6 outline-none text-sm uppercase tracking-[0.15em] placeholder:text-neutral-600`}
+                />
+              ))}
+            </div>
+
             <button
               onClick={() => {
                 if (editingId) {
@@ -257,28 +434,16 @@ export default function Home() {
                   addItem();
                 }
               }}
-              className="bg-white text-black px-5 py-3 rounded-xl font-medium hover:opacity-90 transition"
+              className={`${mono.className} w-full py-6 uppercase tracking-[0.2em] border-t border-white/10 hover:bg-white hover:text-black transition`}
             >
-              {editingId ? "Сохранить" : "Добавить"}
+              {editingId ? "SAVE" : "ADD ITEM"}
             </button>
-
-            {editingId && (
-              <button
-                onClick={() => {
-                  setEditingId(null);
-                  resetForm();
-                  setShowForm(false);
-                }}
-                className="bg-neutral-900 border border-neutral-800 px-5 py-3 rounded-xl font-medium"
-              >
-                Отмена
-              </button>
-            )}
           </div>
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-3 p-3 md:grid-cols-3 md:gap-5 md:p-6 xl:grid-cols-4">
+      {/* GRID */}
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 border-t border-white/10">
         {items
           .filter((item) => {
             const matchesCategory =
@@ -304,91 +469,101 @@ export default function Home() {
               b.price?.replace(/\D/g, "") || "0"
             );
 
-            if (sort === "cheap") {
-              return priceA - priceB;
-            }
+            if (sort === "cheap") return priceA - priceB;
 
-            if (sort === "expensive") {
-              return priceB - priceA;
-            }
+            if (sort === "expensive") return priceB - priceA;
 
             return 0;
           })
-          .map((item, index) => (
+          .map((item) => (
             <div
-              key={index}
-              className="relative overflow-hidden rounded-3xl border border-neutral-900 bg-neutral-950 transition duration-300 hover:scale-[1.02]"
+              key={item.id}
+              className="group border-r border-b border-white/10 relative bg-[#050505]"
             >
-              <button
-                onClick={() => deleteItem(item.id)}
-                className="absolute top-3 right-3 z-20 h-8 w-8 rounded-full bg-black/60 text-sm text-white backdrop-blur transition hover:bg-red-500"
-              >
-                ×
-              </button>
+              {/* ACTIONS */}
+              <div className="absolute top-3 left-3 right-3 z-20 flex justify-between">
+                <button
+                  onClick={() => {
+                    setEditingId(item.id);
 
-              <button
-                onClick={() => {
-                  setEditingId(item.id);
-                  setShowForm(true);
+                    setTitle(item.title || "");
+                    setBrand(item.brand || "");
+                    setPrice(item.price || "");
+                    setCategory(item.category || "");
+                    setImage(item.image || "");
+                    setSourceUrl(item.source_url || "");
 
-                  setTitle(item.title || "");
-                  setBrand(item.brand || "");
-                  setPrice(item.price || "");
-                  setCategory(item.category || "");
-                  setImage(item.image || "");
-                  setSourceUrl(item.source_url || "");
+                    setShowForm(true);
+                  }}
+                  className={`${mono.className} text-[10px] tracking-[0.2em] text-white/70 hover:text-white`}
+                >
+                  EDIT
+                </button>
 
-                  window.scrollTo({
-                    top: 0,
-                    behavior: "smooth",
-                  });
-                }}
-                className="absolute top-3 left-3 z-20 rounded-full bg-black/60 px-3 h-8 text-sm text-white backdrop-blur transition hover:bg-white hover:text-black"
-              >
-                Edit
-              </button>
+                <button
+                  onClick={() => deleteItem(item.id)}
+                  className="text-white/60 hover:text-red-500 transition"
+                >
+                  ×
+                </button>
+              </div>
 
               <a
                 href={item.source_url}
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <div className="aspect-[3/4] overflow-hidden bg-neutral-900">
+                {/* IMAGE */}
+                <div className="aspect-[3/4] overflow-hidden bg-[#0b0b0b]">
                   <img
                     src={item.image}
                     alt={item.title}
-                    className="h-full w-full object-cover"
+                    className="w-full h-full object-cover group-hover:scale-[1.04] transition duration-1000 ease-out"
                   />
                 </div>
 
-                <div className="p-3 md:p-4">
-                  <p className="mb-1 text-xs uppercase text-neutral-500">
+                {/* INFO */}
+                <div className="p-4 md:p-6">
+                  <div
+                    className={`${mono.className} text-[10px] uppercase tracking-[0.22em] text-neutral-500 mb-4`}
+                  >
                     {item.brand}
-                  </p>
+                  </div>
 
-                  <h2 className="line-clamp-2 text-sm font-medium leading-snug">
+                  <h2 className="text-sm md:text-lg leading-[1.05] tracking-[-0.06em] uppercase max-w-[90%]">
                     {item.title}
                   </h2>
 
-                  <p className="mt-2 text-xs text-neutral-400">
-                    {item.category}
-                  </p>
+                  <div className="flex items-end justify-between mt-8">
+                    <div>
+                      <div
+                        className={`${mono.className} text-[10px] uppercase tracking-[0.18em] text-neutral-600`}
+                      >
+                        Category
+                      </div>
 
-                  <p className="mt-3 text-sm font-semibold">
-                    {item.price}
-                  </p>
+                      <div className="text-xs text-neutral-300 mt-1">
+                        {item.category}
+                      </div>
+                    </div>
+
+                    <div className="text-right">
+                      <div
+                        className={`${mono.className} text-[10px] uppercase tracking-[0.18em] text-neutral-600`}
+                      >
+                        Price
+                      </div>
+
+                      <div className="text-sm md:text-base mt-1">
+                        {item.price}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </a>
             </div>
           ))}
       </div>
-
-      <button
-        onClick={() => setShowForm(!showForm)}
-        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-white text-3xl text-black shadow-2xl transition active:scale-95"
-      >
-        +
-      </button>
     </main>
   );
 }

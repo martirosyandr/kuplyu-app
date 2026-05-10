@@ -57,7 +57,6 @@ export default function Home() {
     if (!title || !brand) return;
 
     await supabase.from("items").insert({
-      telegram_id: telegramId,
       title,
       brand,
       price,
@@ -71,35 +70,33 @@ export default function Home() {
     setShowForm(false);
   }
 
-  async function updateItem(id: number) {
-    await supabase
-      .from("items")
-      .update({
-        title,
-        brand,
-        price,
-        category,
-        image,
-        source_url,
-      })
-      .eq("id", id)
-      .eq("telegram_id", telegramId);
+ async function updateItem(id: number) {
+  await supabase
+    .from("items")
+    .update({
+      title,
+      brand,
+      price,
+      category,
+      image,
+      source_url,
+    })
+    .eq("id", id);
 
-    resetForm();
-    setEditingId(null);
-    fetchItems();
-    setShowForm(false);
-  }
+  resetForm();
+  setEditingId(null);
+  fetchItems();
+  setShowForm(false);
+}
 
   async function deleteItem(id: number) {
-    await supabase
-      .from("items")
-      .delete()
-      .eq("id", id)
-      .eq("telegram_id", telegramId);
+  await supabase
+    .from("items")
+    .delete()
+    .eq("id", id);
 
-    fetchItems();
-  }
+  fetchItems();
+}
 
   function resetForm() {
     setTitle("");

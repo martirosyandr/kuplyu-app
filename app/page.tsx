@@ -45,16 +45,13 @@ export default function Home() {
   }, []);
 
   async function fetchItems() {
-    if (!telegramId) return;
+  const { data } = await supabase
+    .from("items")
+    .select("*")
+    .order("id", { ascending: false });
 
-    const { data } = await supabase
-      .from("items")
-      .select("*")
-      .eq("telegram_id", telegramId)
-      .order("id", { ascending: false });
-
-    if (data) setItems(data);
-  }
+  if (data) setItems(data);
+}
 
   async function addItem() {
     if (!title || !brand) return;
